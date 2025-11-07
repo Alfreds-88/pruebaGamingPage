@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    container_name: prueba_gaming_web
+    ports:
+      - "8080:80" # Accede al sitio en http://localhost:8080
+    depends_on:
+      - db
+    # En desarrollo es útil montar el directorio para ver cambios sin rebuild
+    volumes:
+      - ./:/usr/local/apache2/htdocs/:ro
+
+  db:
+    image: mysql:8.0
+    container_name: prueba_gaming_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: gamingdb
+      MYSQL_USER: gamer
+      MYSQL_PASSWORD: gamerpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
+    driver: local
+
+# Seguridad: cambia las contraseñas por defecto antes de producción.
